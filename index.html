@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6E0B0F">
+<title>REDEFINE BD Entry</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--m:#6E0B0F;--m2:#8E1A1F;--off:#F8F7F3;--g:#9CA3AF;--d:#2E2E2E;--line:#E5E1D8;--ok:#166534}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--off);color:var(--d);font-size:15px}
+header{background:var(--m);color:#fff;padding:16px 16px 18px;position:sticky;top:0;z-index:5}
+.brand{font:700 15px Montserrat;letter-spacing:1px}
+.stats{display:flex;gap:10px;margin-top:10px}
+.stat{flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:8px 10px}
+.stat small{display:block;font-size:11px;opacity:.85}
+.stat b{font:700 18px Montserrat}
+main{padding:14px 16px 120px}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:none;padding:11px 4px;border-radius:10px;font:600 14px Inter;color:var(--d)}
+.seg button.on{background:var(--m);color:#fff}
+.amt{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 14px;display:flex;align-items:center}
+.amt span{font:700 26px Montserrat;color:var(--m);margin-right:6px}
+.amt input{border:0;outline:0;font:700 30px Montserrat;width:100%;color:var(--d);background:none}
+label{display:block;font-size:12px;font-weight:600;color:#6B6B6B;margin:14px 2px 6px;text-transform:uppercase;letter-spacing:.4px}
+input.f,select.f{width:100%;padding:13px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:500 15px Inter;color:var(--d)}
+input.f:focus,select.f:focus{outline:2px solid var(--m);border-color:var(--m)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 12px;font:500 13px Inter;color:var(--d)}
+.chip.on{background:var(--m);color:#fff;border-color:var(--m)}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.sugg{background:#fff;border:1px solid var(--line);border-radius:12px;margin-top:4px;overflow:hidden;display:none}
+.sugg div{padding:11px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.sugg div small{color:var(--g);float:right;font-size:11px}
+.save{position:fixed;left:16px;right:16px;bottom:16px;padding:17px;border:0;border-radius:16px;background:var(--m);color:#fff;font:700 17px Montserrat;box-shadow:0 8px 24px rgba(110,11,15,.35)}
+.save:disabled{opacity:.55}
+.toast{position:fixed;left:16px;right:16px;bottom:88px;padding:13px 14px;border-radius:12px;font-size:14px;display:none;z-index:9}
+.toast.ok{display:block;background:#E8F5EC;color:var(--ok)}.toast.err{display:block;background:#FDECEC;color:#B91C1C}
+h3{font:700 13px Montserrat;color:var(--m);margin:26px 2px 8px;text-transform:uppercase;letter-spacing:.6px}
+.rec{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ri{display:flex;justify-content:space-between;padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.ri .l b{display:block;font-weight:600;font-size:14px}.ri .l small{color:var(--g)}
+.ri .r{text-align:right;font-weight:700;white-space:nowrap}
+.cr{color:var(--ok)}.co{color:#B91C1C}
+.pend{background:#FFF7E6;color:#8A5A00;border-radius:10px;padding:9px 12px;font-size:13px;margin-top:12px;display:none}
+.hide{display:none}
+#keyScreen{position:fixed;inset:0;background:var(--off);z-index:20;padding:40px 22px;display:none}
+#keyScreen h2{font:700 20px Montserrat;color:var(--m);margin:0 0 8px}
+#keyScreen p{color:#555;font-size:14px;margin:0 0 18px}
+.kbtn{margin-top:14px;width:100%;padding:15px;border:0;border-radius:14px;background:var(--m);color:#fff;font:700 16px Montserrat}
+.gear{float:right;background:none;border:0;color:#fff;font-size:18px;opacity:.8}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">REDEFINE BD · QUICK ENTRY <button class="gear" id="gear" title="Settings">⚙</button></div>
+  <div class="stats">
+    <div class="stat"><small>Cash in hand</small><b id="bal">…</b></div>
+    <div class="stat"><small>Today's cost</small><b id="tcost">…</b></div>
+  </div>
+</header>
+<main>
+  <div class="seg" id="seg">
+    <button data-t="cost" class="on">Cost</button>
+    <button data-t="credit">Credit</button>
+    <button data-t="both">Both</button>
+  </div>
+
+  <div class="amt"><span>৳</span><input id="amount" type="number" inputmode="decimal" placeholder="0"></div>
+
+  <label>Details</label>
+  <input class="f" id="details" placeholder="e.g. Mobile bill" autocomplete="off">
+  <div class="sugg" id="sugg"></div>
+  <div class="chips" id="quick" style="margin-top:8px"></div>
+
+  <div id="catBox"><label>Category</label><div class="chips" id="cats"></div></div>
+  <div id="srcBox" class="hide"><label>Source (whose money)</label><div class="chips" id="srcs"></div></div>
+
+  <div class="row">
+    <div><label>Date</label><input class="f" id="date" type="date"></div>
+    <div style="flex:.55"><label>Qty</label><input class="f" id="qty" placeholder="optional"></div>
+  </div>
+
+  <div class="pend" id="pend"></div>
+
+  <h3>Recent entries</h3>
+  <div class="rec" id="rec"><div class="ri">Loading…</div></div>
+</main>
+<div id="keyScreen">
+  <h2>Connect to Google Sheet</h2>
+  <p>Enter your secret API key once. It stays only on this phone.</p>
+  <input class="f" id="keyIn" placeholder="RBD-..." autocomplete="off">
+  <button class="kbtn" id="keySave">Connect</button>
+</div>
+<div class="toast" id="toast"></div>
+<button class="save" id="save">Save Entry</button>
+
+<script>
+let type='cost', cat='', src='', DATA=null;
+const $=id=>document.getElementById(id);
+const tk=n=>'৳'+Number(n||0).toLocaleString('en-IN');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t,ok){const e=$('toast');e.textContent=t;e.className='toast '+(ok?'ok':'err');clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',3500);}
+function lsGet(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');type=b.dataset.t;
+  $('catBox').classList.toggle('hide',type==='credit');
+  $('srcBox').classList.toggle('hide',type==='cost');
+});
+function chips(box,list,get,set){
+  $(box).innerHTML=list.map(v=>'<button class="chip" data-v="'+esc(v)+'">'+esc(v)+'</button>').join('');
+  $(box).querySelectorAll('.chip').forEach(c=>c.onclick=()=>{set(get()===c.dataset.v?'':c.dataset.v);mark(box,get());});
+}
+function mark(box,v){$(box).querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.v===v));}
+function setCat(v){cat=v;mark('cats',v)} function setSrc(v){src=v;mark('srcs',v)}
+function pick(it){
+  $('details').value=it.t;$('sugg').style.display='none';
+  if(it.c){setCat(it.c)} if(it.s){setSrc(it.s)}
+  if(it.s&&!it.c&&type==='cost'){document.querySelector('#seg [data-t=credit]').click()}
+  if(it.c&&!it.s&&type==='credit'){document.querySelector('#seg [data-t=cost]').click()}
+  $('amount').focus();
+}
+$('details').addEventListener('input',()=>{
+  const q=$('details').value.trim().toLowerCase(); const s=$('sugg');
+  if(!q||!DATA){s.style.display='none';return}
+  const m=DATA.items.filter(i=>i.t.toLowerCase().includes(q)).slice(0,6);
+  if(!m.length){s.style.display='none';return}
+  s.innerHTML=m.map((i,k)=>'<div data-k="'+k+'">'+esc(i.t)+'<small>'+esc(i.c||i.s||'')+'</small></div>').join('');
+  s.style.display='block';
+  s.querySelectorAll('div').forEach(d=>d.onclick=()=>pick(m[+d.dataset.k]));
+});
+function render(d){
+  DATA=d;$('bal').textContent=tk(d.balance);$('tcost').textContent=tk(d.todayCost);
+  if(!$('date').value)$('date').value=d.today;
+  chips('cats',d.cats,()=>cat,setCat);chips('srcs',d.srcs,()=>src,setSrc);
+  const q=d.items.slice(0,8);
+  $('quick').innerHTML=q.map((i,k)=>'<button class="chip" data-k="'+k+'">'+esc(i.t)+'</button>').join('');
+  $('quick').querySelectorAll('.chip').forEach(c=>c.onclick=()=>pick(q[+c.dataset.k]));
+  recent(d.recent);lsSet('cache',d);
+}
+function recent(list){
+  $('rec').innerHTML=list.length?list.map(r=>'<div class="ri"><div class="l"><b>'+esc(r.details)+'</b><small>'+esc(r.date)+' · '+esc(r.cat||r.src||'')+'</small></div><div class="r">'+
+    (r.credit?'<div class="cr">+'+tk(r.credit)+'</div>':'')+(r.cost?'<div class="co">−'+tk(r.cost)+'</div>':'')+'</div></div>').join(''):'<div class="ri">No entries</div>';
+}
+const API='https://script.google.com/macros/s/AKfycbxlMpgJv-rnBqwRTIBzZKjfEtVNBtkTKJAjiobDc4QwwvKuFw-VbX_-9lr_SnqIUjN4/exec';
+function key(){return lsGet('apikey','')}
+async function api(action,entry){
+  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:key(),action,entry})});
+  const j=await r.json(); if(!j.ok){const e=new Error(j.error||'Error');e.server=true;throw e;} return j.data;
+}
+function load(){ if(!key()) return; api('data').then(render).catch(e=>{ if(e.server&&/key/i.test(e.message)){askKey();} const c=lsGet('cache',null); if(c&&!DATA) render(c); }); }
+function askKey(){$('keyScreen').style.display='block';$('keyIn').value=key();}
+$('gear').onclick=askKey;
+$('keySave').onclick=()=>{const k=$('keyIn').value.trim(); if(!k) return; lsSet('apikey',k);
+  api('data').then(d=>{$('keyScreen').style.display='none';render(d);toast('✓ Connected',true);flush();}).catch(e=>toast(e.server?e.message:'No internet',false));};
+
+function queue(){return lsGet('queue',[])}
+function showPend(){const n=queue().length;$('pend').style.display=n?'block':'none';$('pend').textContent=n+' entry waiting to sync (offline). Will send automatically when online.';}
+function send(f,cb){api('save',f).then(r=>cb(null,r)).catch(e=>cb(e));}
+function flush(){
+  const q=queue(); if(!q.length) return;
+  send(q[0],(err,r)=>{ if(err){ if(err.server){toast('Sync error: '+err.message,false);} return; }
+    lsSet('queue',queue().slice(1)); showPend(); if(r&&r.balance!==undefined)$('bal').textContent=tk(r.balance); flush(); if(!queue().length) load(); });
+}
+window.addEventListener('online',flush);
+
+$('save').onclick=()=>{
+  const f={id:Date.now()+'-'+Math.random().toString(36).slice(2,7),type,date:$('date').value,details:$('details').value.trim(),
+    qty:$('qty').value.trim(),amount:$('amount').value,cat:(type==='credit'?'':cat),src:(type==='cost'?'':src)};
+  if(!(+f.amount>0)) return toast('Enter the amount',false);
+  if(!f.details) return toast('Write the details',false);
+  if(type!=='credit'&&!f.cat) return toast('Choose a Category',false);
+  if(type!=='cost'&&!f.src) return toast('Choose a Source',false);
+  $('save').disabled=true;
+  const done=()=>{$('save').disabled=false;['amount','details','qty'].forEach(i=>$(i).value='');setCat('');setSrc('');};
+  if(!navigator.onLine){lsSet('queue',queue().concat([f]));showPend();toast('Saved offline – will sync later',true);done();return;}
+  send(f,(err,r)=>{
+    if(err){
+      if(!err.server){lsSet('queue',queue().concat([f]));showPend();toast('No connection – saved offline',true);done();}
+      else{$('save').disabled=false;toast(err.message||String(err),false);}
+      return;
+    }
+    toast('✓ Saved to Cash Book. Balance '+tk(r.balance),true);done();
+    load();
+  });
+};
+const c=lsGet('cache',null); if(c) render(c);
+showPend(); if(!key()) askKey(); else { load(); flush(); }
+setInterval(flush,60000);
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
+</script>
+</body>
+</html>

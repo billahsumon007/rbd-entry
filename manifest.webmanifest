@@ -1,0 +1,16 @@
+{
+  "name": "REDEFINE BD Entry",
+  "short_name": "RBD Entry",
+  "description": "Quick cash book entry for REDEFINE BD",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F7F3",
+  "theme_color": "#6E0B0F",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
