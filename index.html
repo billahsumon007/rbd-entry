@@ -49,6 +49,18 @@ h3{font:700 13px Montserrat;color:var(--m);margin:26px 2px 8px;text-transform:up
 .cr{color:var(--ok)}.co{color:#B91C1C}
 .pend{background:#FFF7E6;color:#8A5A00;border-radius:10px;padding:9px 12px;font-size:13px;margin-top:12px;display:none}
 .hide{display:none}
+.tabs{display:flex;gap:6px;margin-top:12px}
+.tabs button{flex:1;border:0;border-radius:10px;padding:9px;background:rgba(255,255,255,.14);color:#fff;font:600 13px Inter}
+.tabs button.on{background:#fff;color:var(--m)}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
+.kpis{display:flex;gap:8px}.kpis .card{flex:1;margin-top:0;padding:10px}
+.kpis small{display:block;font-size:11px;color:#777}.kpis b{font:700 16px Montserrat}
+.bar{margin:9px 0}.bar .t{display:flex;justify-content:space-between;font-size:13px}
+.bar .b{height:8px;background:#EFEBE4;border-radius:6px;margin-top:4px;overflow:hidden}
+.bar .b i{display:block;height:100%;background:var(--m);border-radius:6px}
+.stat-ok{background:#E8F5EC;color:var(--ok);font-weight:600}.stat-bad{background:#FDECEC;color:#B91C1C;font-weight:600}
+.undo{float:right;border:1px solid var(--line);background:#fff;border-radius:10px;padding:5px 10px;font:600 12px Inter;color:#B91C1C;text-transform:none;letter-spacing:0}
+#sumView{padding:14px 16px 40px}
 #keyScreen{position:fixed;inset:0;background:var(--off);z-index:20;padding:40px 22px;display:none}
 #keyScreen h2{font:700 20px Montserrat;color:var(--m);margin:0 0 8px}
 #keyScreen p{color:#555;font-size:14px;margin:0 0 18px}
@@ -63,6 +75,7 @@ h3{font:700 13px Montserrat;color:var(--m);margin:26px 2px 8px;text-transform:up
     <div class="stat"><small>Cash in hand</small><b id="bal">…</b></div>
     <div class="stat"><small>Today's cost</small><b id="tcost">…</b></div>
   </div>
+  <div class="tabs"><button id="tEntry" class="on">✏️ Entry</button><button id="tSum">📊 Summary</button></div>
 </header>
 <main>
   <div class="seg" id="seg">
@@ -88,9 +101,27 @@ h3{font:700 13px Montserrat;color:var(--m);margin:26px 2px 8px;text-transform:up
 
   <div class="pend" id="pend"></div>
 
-  <h3>Recent entries</h3>
+  <h3>Recent entries <button class="undo" id="undo">↶ Undo last</button></h3>
   <div class="rec" id="rec"><div class="ri">Loading…</div></div>
 </main>
+<section id="sumView" class="hide">
+  <div class="chips" id="per">
+    <button class="chip" data-p="today">Today</button>
+    <button class="chip on" data-p="month">This month</button>
+    <button class="chip" data-p="last">Last month</button>
+    <button class="chip" data-p="all">All time</button>
+    <button class="chip" data-p="custom">Custom</button>
+  </div>
+  <div class="row hide" id="custom"><div><label>From</label><input class="f" type="date" id="sFrom"></div><div><label>To</label><input class="f" type="date" id="sTo"></div></div>
+  <div class="kpis" style="margin-top:12px">
+    <div class="card"><small>Cost</small><b id="kCost" class="co">…</b></div>
+    <div class="card"><small>Credit</small><b id="kCred" class="cr">…</b></div>
+    <div class="card"><small>Net</small><b id="kNet">…</b></div>
+  </div>
+  <h3>Cost by category</h3><div class="card" id="sCats"></div>
+  <h3>Hard Cash (credit by source)</h3><div class="card" id="sSrc"></div>
+  <h3>All-time check</h3><div class="card" id="sStatus"></div>
+</section>
 <div id="keyScreen">
   <h2>Connect to Google Sheet</h2>
   <p>Enter your secret API key once. It stays only on this phone.</p>
@@ -192,6 +223,42 @@ $('save').onclick=()=>{
     load();
   });
 };
+// ---- tabs ----
+function view(v){$('tEntry').classList.toggle('on',v==='e');$('tSum').classList.toggle('on',v==='s');
+  document.querySelector('main').classList.toggle('hide',v!=='e');$('save').classList.toggle('hide',v!=='e');
+  $('sumView').classList.toggle('hide',v!=='s'); if(v==='s') loadSum();}
+$('tEntry').onclick=()=>view('e'); $('tSum').onclick=()=>view('s');
+// ---- summary ----
+let per='month';
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function range(){const n=new Date();
+  if(per==='today')return{from:ymd(n),to:ymd(n)};
+  if(per==='month')return{from:ymd(new Date(n.getFullYear(),n.getMonth(),1)),to:ymd(n)};
+  if(per==='last')return{from:ymd(new Date(n.getFullYear(),n.getMonth()-1,1)),to:ymd(new Date(n.getFullYear(),n.getMonth(),0))};
+  if(per==='custom')return{from:$('sFrom').value,to:$('sTo').value};
+  return{};}
+document.querySelectorAll('#per .chip').forEach(c=>c.onclick=()=>{per=c.dataset.p;
+  document.querySelectorAll('#per .chip').forEach(x=>x.classList.toggle('on',x===c));
+  $('custom').classList.toggle('hide',per!=='custom'); if(per!=='custom'||($('sFrom').value&&$('sTo').value)) loadSum();});
+['sFrom','sTo'].forEach(i=>$(i).onchange=()=>{if($('sFrom').value&&$('sTo').value)loadSum();});
+function bars(obj,cls){const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]);const mx=Math.max(1,...e.map(x=>x[1]));
+  const s=e.reduce((a,x)=>a+x[1],0);
+  return e.map(([k,v])=>'<div class="bar"><div class="t"><span>'+esc(k)+'</span><b class="'+cls+'">'+tk(v)+(s?' <small style="color:#999;font-weight:400">'+Math.round(v*100/s)+'%</small>':'')+'</b></div><div class="b"><i style="width:'+(v*100/mx)+'%"></i></div></div>').join('');}
+function loadSum(){ $('kCost').textContent='…';
+  api('summary',range()).then(s=>{ $('kCost').textContent=tk(s.cost);$('kCred').textContent=tk(s.credit);$('kNet').textContent=tk(s.credit-s.cost);
+    $('sCats').innerHTML=bars(s.cats,'co'); $('sSrc').innerHTML=bars(s.srcs,'cr');
+    $('sStatus').className='card '+(s.status.ok?'stat-ok':'stat-bad');
+    $('sStatus').innerHTML=(s.status.ok?'✅ All matched':'❌ Check needed')+'<br><small style="font-weight:400">Total cost '+tk(s.all.cost)+' · Total credit '+tk(s.all.credit)+' · Cash in hand '+tk(s.balance)+
+      (s.status.noCat?'<br>Cost without category: '+tk(s.status.noCat):'')+(s.status.noSrc?'<br>Credit without source: '+tk(s.status.noSrc):'')+'</small>';
+    $('bal').textContent=tk(s.balance);
+  }).catch(e=>toast(e.server?e.message:'No internet',false)); }
+// ---- undo ----
+$('undo').onclick=()=>{ if(!navigator.onLine) return toast('Need internet to undo',false);
+  api('last').then(l=>{
+    const msg='Delete this last entry from Cash Book?\n\n'+l.details+'\n'+(l.cost?'Cost '+tk(l.cost)+' ('+l.cat+')':'')+(l.credit?'\nCredit '+tk(l.credit)+' ('+l.src+')':'');
+    if(!confirm(msg)) return;
+    api('undo',l).then(r=>{toast('↶ Deleted. Balance '+tk(r.balance),true);load();}).catch(e=>toast(e.message,false));
+  }).catch(e=>toast(e.server?e.message:'No internet',false)); };
 const c=lsGet('cache',null); if(c) render(c);
 showPend(); if(!key()) askKey(); else { load(); flush(); }
 setInterval(flush,60000);
